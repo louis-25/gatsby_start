@@ -27,3 +27,60 @@ exports.onCreateNode = ({ node, getNode, actions }) => {
     createNodeField({ node, name: 'slug', value: slug })
   }
 }
+
+// 게시글 페이지 생성해주는 부분
+exports.createPages = async ({ actions, graphql, reporter }) => {
+  const { createPage } = actions
+
+  // Slug필드 조회쿼리
+  const queryAllMarkdownData = await graphql(
+    `
+      {
+        allMarkdownRemark(
+          sort: {
+            order: DESC
+            fields: [frontmatter___date, frontmatter___title]
+          }
+        ) {
+          edges {
+            node {
+              fields {
+                slug
+              }
+            }
+          }
+        }
+      }
+    `,
+  )
+
+  // 에러 핸들링
+  if (queryAllMarkdownData.errors) {
+    reporter.panicOnBuild(`Error while running query`)
+    return
+  }
+
+  // 템플릿 컴포넌트 불러오기
+  const PostTemplateComponent = path.resolve(
+    __dirname,
+    'src/templates/post_template.tsx',
+  )
+
+  // 페이지 생성해주는 함수
+  const generatePostPage = ({
+    node: {
+      fields: { slug },
+    },
+  }) => {
+    const pageOptions = {
+      path: slug,
+      component: PostTemplateComponent,
+      context: { slug },
+    }
+
+    createPage(pageOptions)
+  }
+
+  // Generate Post Page And Passing Slug Props for Query
+  queryAllMarkdownData.data.allMarkdownRemark.edges.forEach(generatePostPage)
+}
