@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from 'react'
 import { PostPageItemType } from 'types/PostItem.types'
 import { graphql } from 'gatsby'
+import Template from 'components/Common/Template'
 
 type PostTemplateProps = {
   data: {
@@ -21,12 +22,7 @@ const PostTemplate: FunctionComponent<PostTemplateProps> = function ({
 }) {
   console.log(edges)
   console.log(href)
-  return (
-    <>
-      <div>edge </div>
-      <div>location </div>
-    </>
-  )
+  return <Template>Post Template</Template>
 }
 
 export default PostTemplate
